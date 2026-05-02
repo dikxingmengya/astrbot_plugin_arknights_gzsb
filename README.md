@@ -95,5 +95,5 @@ astrbot_plugin_arknights_gzsb/
 
 ## 贡献与反馈
 
-欢迎提 issue 或 PR 改进插件。项目基于 MIT 协议开源。
+欢迎提 issue 或 PR 改进插件。项目基于 AGPL-3.0 license 协议开源。
 
