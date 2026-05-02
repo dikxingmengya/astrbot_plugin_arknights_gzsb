@@ -1,0 +1,71 @@
+{
+  "output_format": {
+    "description": "输出格式",
+    "type": "string",
+    "options": ["normal","all"],
+    "default": "normal",
+    "hint": "normal：不输出 2★/3★ 干员；all：输出全部干员"
+  },
+  "enable_vlm": {
+    "description": "允许调用 VLM 进行图片识别",
+    "type": "bool",
+    "default": true,
+    "hint": "仅在使用指令时调用 VLM，会消耗 token"
+  },
+  "character_path": {
+    "description": "干员信息存储文件路径",
+    "type": "string",
+    "default": "characters.json",
+    "hint": "一般情况下请不要修改此项参数",
+    "obvious_hint": true
+  },
+  "operators_path": {
+    "description": "词条信息存储文件路径",
+    "type": "string",
+    "default": "operators.json",
+    "hint": "一般情况下请不要修改此项参数",
+    "obvious_hint": true
+  },
+  "auto_detection": {
+    "description": "自动检测公招图片",
+    "type": "bool",
+    "default": false,
+    "hint": "当发送公招界面图片时，自动检测并回复；开启此选项会大幅增加CPU占用！"
+  },
+  "min_ratio": {
+    "description": "公招图片最小长宽比率",
+    "type": "float",
+    "default": 1.4,
+    "hint": "当【自动检测公招图片】启用时，进行 Ocr 识别的图片最小长宽比率"
+  },
+  "max_ratio": {
+    "description": "公招图片最大长宽比率",
+    "type": "float",
+    "default": 2.4,
+    "hint": "当【自动检测公招图片】启用时，进行 Ocr 识别的图片最大长宽比率"
+  },
+  "cut_left": {
+    "description": "公招图片左侧切除边界",
+    "type": "float",
+    "default": 0.3,
+    "hint": "当【自动检测公招图片】启用时，公招图片词条部分的剪切范围"
+  },
+  "cut_right": {
+    "description": "公招图片右侧切除边界",
+    "type": "float",
+    "default": 0.7,
+    "hint": "当【自动检测公招图片】启用时，公招图片词条部分的剪切范围"
+  },
+  "cut_upper": {
+    "description": "公招图片上方切除边界",
+    "type": "float",
+    "default": 0.5,
+    "hint": "当【自动检测公招图片】启用时，公招图片词条部分的剪切范围"
+  },
+  "cut_lower": {
+    "description": "公招图片下方切除边界",
+    "type": "float",
+    "default": 0.67,
+    "hint": "当【自动检测公招图片】启用时，公招图片词条部分的剪切范围"
+  }
+}

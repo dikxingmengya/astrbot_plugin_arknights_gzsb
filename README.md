@@ -1,14 +1,99 @@
-# astrbot-plugin-helloworld
+# 明日方舟公招识别
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+基于 AstrBot 的《明日方舟》公开招募自动识别插件。支持 **OCR 本地识别** 和 **VLM 大模型识别**，自动匹配标签组合并生成包含干员头像、稀有度、职业的精美图片，帮助博士快速决策。
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+---
 
-# Supports
+## 功能特性
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+- 📷 **自动截图识别**：发送游戏公开招募页面截图，机器人自动裁剪标签区域并识别词条（需开启 `auto_detection`）
+- 📝 **文本标签查询**：直接发送词条文本（如”近战位 远程“），机器人返回匹配的干员组合
+- 🖼️ **图片输出结果**：生成美观的干员卡片图片，包含词条标签、干员头像（带职业图标和星级）、稀有度颜色区分
+- 🤖 **双识别模式**：
+  - `OCR`：使用 RapidOCR 本地推理，隐私安全，无需 GPU
+  - `VLM`：调用大模型视觉能力，识别精度更高（需配置 AI 提供商）
+- 🎨 **视觉元素**：
+  - 左侧黑色药丸标签，支持多词条自动换行
+  - 干员卡片根据稀有度着色（灰/绿/蓝/紫/金/橙）
+  - 头像左上角显示职业图标，右下角显示星级图标
+  - 组间分割线，文字清晰高 DPI
+- ⚙️ **高度可配置**：裁剪区域、长宽比阈值、输出格式等均可调整
+- 🔋 **轻量部署**：最低 2 核 2G 服务器即可流畅运行
+
+---
+
+## 配置文件
+
+插件目录下的 `config.yaml` 示例：
+
+```yaml
+output_format: "normal"       # 输出格式: normal(只显示4/5/6星), all(显示全部)
+enable_vlm: true              # 是否启用大模型识别
+character_path: "characters.json"
+operators_path: "operators.json"
+auto_detection: true          # 是否自动检测图片消息
+min_ratio: 1.4                # 横屏最小宽高比
+max_ratio: 2.4                # 横屏最大宽高比
+cut_left: 0.3                 # 标签区域左边界比例
+cut_right: 0.7                # 右边界
+cut_upper: 0.5                # 上边界
+cut_lower: 0.67               # 下边界
+```
+
+---
+
+## 使用
+
+### 命令
+
+使用`/公招识别` 或 `/gzsb` 进行识别
+
+后可跟随图片或词条文本，例如：
+- `/公招识别 [图片]`
+- `/公招识别 近战位 远程`
+
+也可组合使用，例如：
+- `/公招识别 [图片1][图片2] 近战位 远程`
+
+### 自动检测
+
+若配置 `auto_detection: true`，机器人会监听所有单图片消息，自动判断是否为公开招募截图（通过检测宽高比和 ocr 识别），并返回识别结果。
+
+---
+
+## 识别逻辑
+
+1. 从消息中提取图片和文本标签。
+2. 若为图片：
+   - 根据配置裁剪标签区域
+   - 使用 OCR 或 VLM 识别词条
+3. 将识别到的词条与干员招募组合数据库（`operators.json`）进行匹配。
+4. 根据 `output_format` 过滤结果。
+5. 渲染为 HTML/CSS 风格的 Pillow 图片（包含词条和干员卡片）。
+6. 以消息链形式发送图片和简要信息。
+
+---
+
+## 文件结构
+
+```
+astrbot_plugin_arknights_gzsb/
+├── main.py                 # 插件主逻辑
+├── image_creator.py        # 图片生成（PIL绘制）
+├── image_ocr.py            # OCR 引擎封装与图像处理
+├── recruitment_calculator.py # 干员组合匹配算法
+├── characters.json         # 干员头像、职业、稀有度图标数据
+├── operators.json          # 公开招募标签组合数据库
+├── fonts/                  # 字体文件目录
+│   ├── font.ttf
+│   └── small.ttf
+├── config.yaml             # 插件配置（非必须，使用AstrBot配置）
+└── requirements.txt
+```
+
+---
+
+## 贡献与反馈
+
+欢迎提 issue 或 PR 改进插件。项目基于 MIT 协议开源。
+
