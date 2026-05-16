@@ -17,7 +17,7 @@ from .image_ocr import OcrEngine, is_game_landscape, cut
 from .recruitment_calculator import OperatorFinder
 
 
-@register("gzsb", "Drest", "基于 Ocr 的《明日方舟》公开招募自动识别插件。", "1.0.0")
+@register("gzsb", "Drest", "基于 Ocr 的《明日方舟》公开招募自动识别插件。", "1.0.2")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
@@ -95,7 +95,7 @@ class MyPlugin(Star):
 
         # 初始化匹配器与 OCR 引擎
         self.marcher = OperatorFinder(self.operators_path)
-        self.ocr_engine = OcrEngine(self.tags)
+        self.ocr_engine = OcrEngine(self.handle_tag_in_tag_list)
 
     async def download_image(self, img: str):
         # noinspection PyBroadException
@@ -182,6 +182,17 @@ class MyPlugin(Star):
         ]
         yield event.chain_result(chain)
 
+    def handle_tag_in_tag_list(self, tag: str) -> str | None:
+        if tag.endswith('干员'):
+            tag = tag[:-2]
+        if tag in self.tags:
+            return tag
+        if tag == '资深':
+            return '资深干员'
+        if tag == '高级资深':
+            return '高级资深干员'
+        return None
+
     @filter.command("公招识别", alias={"gzsb"})
     async def on_command(self, event: AstrMessageEvent):
         """公招识别指令"""
@@ -197,8 +208,9 @@ class MyPlugin(Star):
             elif isinstance(message, Plain):
                 # 按空格分割，逐个检查是否在标签集中
                 for word in message.text.split():
-                    if word in self.tags:
-                        tags.append(word)
+                    tag = self.handle_tag_in_tag_list(word)
+                    if tag:
+                        tags.append(tag)
 
         # 直接识别的文本优先响应
         if tags:

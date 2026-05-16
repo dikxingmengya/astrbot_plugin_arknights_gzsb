@@ -19,8 +19,8 @@ def cut(image: Image.Image, cut_left: float = 0.3, cut_right: float = 0.7,
     return image.crop((left, upper, right, lower))
 
 class OcrEngine:
-    def __init__(self, tags: list[str]):
-        self.tags = tags
+    def __init__(self, handle_tag):
+        self.handle_tag = handle_tag
         self.ocr_engine = RapidOCR(
             use_cls=False,            # 关闭方向分类
             use_dilation=False,       # 关闭膨胀算法
@@ -37,6 +37,7 @@ class OcrEngine:
         tags = []
         if result[0]:
             for box, text, score in result[0]:
-                if text.strip() in self.tags:
-                    tags.append(text.strip())
+                tag = self.handle_tag(text.strip())
+                if tag:
+                    tags.append(tag)
         return tags
