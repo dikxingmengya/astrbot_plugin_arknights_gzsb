@@ -1,5 +1,6 @@
 import json
 import itertools
+import logging
 from typing import List, Dict, Set, Tuple
 import os
 
@@ -35,14 +36,14 @@ class OperatorFinder:
 
             # 将干员名转为集合，方便后续交集运算
             char_set = set(characters)
-
+            tags_str = ""
+            tags.sort()
             for tag in tags:
-                if tag not in self.tag_to_operators:
-                    self.tag_to_operators[tag] = set()
-                # 将该干员加入该词条的集合中
-                self.tag_to_operators[tag].update(char_set)
+                tags_str += f"{tag} "
 
-        print(f"[预处理完成] 已索引 {len(self.tag_to_operators)} 个词条。")
+            self.tag_to_operators[tags_str] = char_set
+
+        logging.getLogger("astrbot").info(f"[预处理完成] 已索引 {len(self.tag_to_operators)} 个词条组。")
 
 
 
@@ -68,17 +69,13 @@ class OperatorFinder:
         # 2. 初步计算每个组合的交集干员
         combo_operators = {}
         for combo in all_combos:
-            ops = None
-            for tag in combo:
-                if tag in self.tag_to_operators:
-                    if ops is None:
-                        ops = self.tag_to_operators[tag].copy()
-                    else:
-                        ops &= self.tag_to_operators[tag]
-                else:
-                    ops = set()
-                    break
-            combo_operators[combo] = ops or set()
+            tags: list[str] = list(combo)
+            tags_str = ""
+            tags.sort()
+            for tag in tags:
+                tags_str += f"{tag} "
+
+            combo_operators[combo] = self.tag_to_operators.get(tags_str) or set()
 
         # 3. 按组合长度降序排序，分配干员（长组合优先）
         sorted_combos = sorted(combo_operators.keys(), key=lambda c: len(c), reverse=True)
