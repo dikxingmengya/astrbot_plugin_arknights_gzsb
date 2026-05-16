@@ -17,7 +17,7 @@ from .image_ocr import OcrEngine, is_game_landscape, cut
 from .recruitment_calculator import OperatorFinder
 
 
-@register("gzsb", "Drest", "基于 Ocr 的《明日方舟》公开招募自动识别插件。", "1.0.2")
+@register("gzsb", "Drest", "基于 Ocr 的《明日方舟》公开招募自动识别插件。", "1.0.3")
 class MyPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
