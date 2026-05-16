@@ -118,9 +118,12 @@ def _draw_image(entries, img_cache, font_path, font_small_path):
     for entry in entries:
         tags = entry["tag_set"]
         chars = entry["characters"]
+
+        # ★ 按稀有度降序排序
+        chars = sorted(chars, key=lambda c: c.get("star", 0), reverse=True)
         group_chars.append(chars)
 
-        # 标签区域高度
+        # 标签区域高度（不变）
         tag_total_h = 0
         for tag in tags:
             lines = _wrap_text(tag, font_label, LABEL_AREA_WIDTH - TAG_PADDING * 2)
@@ -131,7 +134,7 @@ def _draw_image(entries, img_cache, font_path, font_small_path):
             tag_total_h -= TAG_GAP
         group_label_heights.append(tag_total_h)
 
-        # 卡片区域高度
+        # 卡片区域高度（使用排序后的 chars）
         char_count = len(chars)
         rows = math.ceil(char_count / MAX_COLS) if char_count > 0 else 1
         group_card_rows.append(rows)

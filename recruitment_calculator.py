@@ -44,7 +44,9 @@ class OperatorFinder:
 
         print(f"[预处理完成] 已索引 {len(self.tag_to_operators)} 个词条。")
 
-    def find(self, tags: List[str]) -> Dict[Tuple[str], List[str]]:
+
+
+    def find(self, tags: List[str]) -> Dict[Tuple[str, ...], List[str]]:
         """
         查找给定词条组合对应的角色。
 
@@ -54,38 +56,43 @@ class OperatorFinder:
         Returns:
             Dict[Tuple[str], List[str]]: 键为词条组合元组，值为对应干员列表。
         """
+
         if not tags:
             return {}
 
+        # 1. 生成所有非空子集组合
+        all_combos = []
+        for r in range(1, len(tags) + 1):
+            all_combos.extend(itertools.combinations(tags, r))
+
+        # 2. 初步计算每个组合的交集干员
+        combo_operators = {}
+        for combo in all_combos:
+            ops = None
+            for tag in combo:
+                if tag in self.tag_to_operators:
+                    if ops is None:
+                        ops = self.tag_to_operators[tag].copy()
+                    else:
+                        ops &= self.tag_to_operators[tag]
+                else:
+                    ops = set()
+                    break
+            combo_operators[combo] = ops or set()
+
+        # 3. 按组合长度降序排序，分配干员（长组合优先）
+        sorted_combos = sorted(combo_operators.keys(), key=lambda c: len(c), reverse=True)
+        assigned_global = set()  # 已经被分配的干员
         result_map = {}
 
-        # 1. 生成所有可能的组合 (从长度1到长度n)
-        # 使用 range(1, len(tags)+1) 生成不同长度的组合
-        for r in range(1, len(tags) + 1):
-            for combo_tuple in itertools.combinations(tags, r):
-                # 2. 对于当前组合，进行集合交集运算
-                # 初始化为全集或者第一个词条的集合
-                common_operators = None
+        for combo in sorted_combos:
+            # 当前组合可用干员 = 交集 - 已被更长组合分配的
+            available = combo_operators[combo] - assigned_global
+            # 更新全局已分配集合
+            assigned_global.update(available)
+            # 排序后存入结果
+            result_map[combo] = sorted(available)
 
-                for tag in combo_tuple:
-                    if tag in self.tag_to_operators:
-                        if common_operators is None:
-                            common_operators = self.tag_to_operators[tag].copy()
-                        else:
-                            common_operators &= self.tag_to_operators[tag]  # 集合交集
-                    else:
-                        # 如果某个词条不存在，该组合结果为空
-                        common_operators = set()
-                        break
-
-                # 转换为列表，若无结果则为空列表
-                operator_list = sorted(list(common_operators)) if common_operators else []
-
-                # 3. 存入结果 (仅当有结果或为了完整性需要包含空结果时)
-                # 这里我们只存储有结果的组合，或者你可以根据需求修改
-                if operator_list:  # 只存储有干员的组合
-                    result_map[combo_tuple] = operator_list
-                # else:
-                #     result_map[combo_tuple] = [] # 如果需要显示无结果的组合，请取消注释此块
-
+        # 如果需要按某种顺序返回（例如保持原标签顺序的某种组合），可以进一步整理
+        # 这里直接返回
         return result_map
